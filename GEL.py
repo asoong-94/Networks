@@ -13,8 +13,8 @@ class Event():
 		self.time = time 
 		self.packet = packet
 		self.type = event_type 
-		self.next_event = next_event
-		self.prev_event = prev_event
+		self.next = next_event
+		self.prev = prev_event
 
 class Packet():
 	def __init__(self, service_time):
@@ -35,7 +35,7 @@ class GEL():
 	def insert(self, new_event):
 		#insert an event
 		if self.head is None:
-			self.head = next_event
+			self.head = new_event
 			return None
 
 		ptr = self.head
@@ -45,7 +45,7 @@ class GEL():
 			ptr.prev = new_event
 			return new_event
 
-		while ptr.next is not None and new_event.time > ptr.next.time:
+		while (ptr.next is not None) and (new_event.time > ptr.next.time):
 			ptr = ptr.next
 
 		new_event.prev = ptr
@@ -63,9 +63,21 @@ class GEL():
 			return None
 
 		ptr = self.head
-		while ptr.next_event is not None:
-			ptr = ptr.next_event
+		while ptr.next is not None:
+			ptr = ptr.next
 		return 
+
+
+# math formulas
+def generate_arrival_time():
+    u = random.random()
+    return ((-1 / arrival_rate) * log(1 - u))
+def generate_service_time():
+    u = random.random()
+    return ((-1 / service_rate) * log(1 - u))
+def generate_packet():
+    return Packet(generate_service_time())
+
 
 if __name__ == '__main__':
 	# configurations
@@ -85,5 +97,55 @@ if __name__ == '__main__':
 
 	# initialize
 	packet_queue = queue.Queue(MAXBUFFER)
-	event_list = GEL.GEL()
+	event_list = GEL()
+
+	N = 10000
+
+	for i in range(N):
+		event_list.schedule("arrival", generate_arrival_time(), generate_packet())
+	# print (event_list.head.time)
+
+	for i in range(N-1):
+	    event = event_list.pop()
+	    current_time = event.time
+	    # print(event.time)
+	    if event.type == "arrival":
+	        total_packet_queue_length += total_active_packets
+	        total_packets += 1
+	        event_list.schedule("arrival", current_time + generate_arrival_time(), generate_packet())
+	        if total_active_packets == 0:
+	            event_list.schedule("departure", current_time + event.packet.service_time, event.packet)
+	            total_active_packets += 1
+	            if server_busy_start_time == -1:
+	                server_busy_start_time = current_time
+	        elif (total_active_packets < MAXBUFFER + 1) or (MAXBUFFER == 0):
+	            packet_queue.put(event.packet)
+	            total_active_packets += 1
+	        else:
+	            total_dropped_packets += 1
+	    elif event.type == "departure":
+	        total_active_packets -= 1
+	        if total_active_packets == 0:
+	            if server_busy_start_time != -1:
+	                total_server_busy_time += current_time - server_busy_start_time
+	                server_busy_start_time = -1
+	        if total_active_packets > 0:
+	            next_packet = packet_queue.get()
+	            event_list.schedule("departure", current_time + next_packet.service_time, next_packet)
+
+	if server_busy_start_time != -1:
+	    total_server_busy_time += current_time - server_busy_start_time
+
+	# results
+	print("--------------------------------------")
+	print("Server utilization:", end=' ')
+	print(total_server_busy_time / current_time)
+	print("Average queue length:", end=' ')
+	print(total_packet_queue_length / total_packets)
+	print("Packet drop rate:", end=' ')
+	print(total_dropped_packets / total_packets)
+	print("--------------------------------------")
+	print("The total number of dropped packets", end=' ')
+	print(total_dropped_packets)
+
 
