@@ -65,7 +65,7 @@ class GEL():
 		ptr = self.head
 		while ptr.next is not None:
 			ptr = ptr.next
-		return 
+		return ptr
 
 
 # math formulas
@@ -103,10 +103,13 @@ if __name__ == '__main__':
 
 	for i in range(N):
 		event_list.schedule("arrival", generate_arrival_time(), generate_packet())
-	# print (event_list.head.time)
+		#print(event_list.head)
+	 	#print(event_list.head.time)
 
 	for i in range(N-1):
 	    event = event_list.pop()
+	    print(event)
+	    #print(event_list)
 	    current_time = event.time
 	    # print(event.time)
 	    if event.type == "arrival":
