@@ -240,15 +240,15 @@ if __name__ == '__main__':
 
 
 	plt.plot(arrival_rates, N10_packetDelays)
-	plt.title("Packet Delays for 10 machines")
-	plt.ylabel("Packet Delays in seconds")
+	plt.title("Average Packet Delays for 10 machines")
+	plt.ylabel("Average Packet Delays in seconds")
 	plt.xlabel("arrival rates")
 	plt.savefig("10-Machines-packetDelays.png")
 	plt.clf()
 
 	plt.plot(arrival_rates, N25_packetDelays)
-	plt.title("Packet Delays for 25 machines")
-	plt.ylabel("Packet Delays in seconds")
+	plt.title("Average Packet Delays for 25 machines")
+	plt.ylabel("Average Packet Delays in seconds")
 	plt.xlabel("arrival rates")
 	plt.savefig("25-Machines-packetDelays.png")
 	plt.clf()
