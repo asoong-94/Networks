@@ -65,7 +65,7 @@ class GEL():
 		ptr = self.head
 		while ptr.next is not None:
 			ptr = ptr.next
-		return 
+		return ptr
 
 
 # math formulas
@@ -79,11 +79,15 @@ def generate_packet():
     return Packet(generate_service_time())
 
 
-if __name__ == '__main__':
+def simulate(MAX_BUFFER, serviceRate, arrivalRate, utilization, queueLength, dropRate, totalDropped):
+
 	# configurations
-	MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
-	service_rate = float(input("Please enter the service rate: "))
-	arrival_rate = float(input("Please enter the arrival rate: "))
+	# MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
+	# service_rate = float(input("Please enter the service rate: "))
+	# arrival_rate = float(input("Please enter the arrival rate: "))
+	MAXBUFFER = MAX_BUFFER
+	service_rate = serviceRate
+	arrival_rate = arrivalRate
 
 	# statistics
 	total_server_busy_time = 0
@@ -101,12 +105,24 @@ if __name__ == '__main__':
 
 	N = 10000
 
+	def generate_arrival_time():
+		u = random.random()
+		return ((-1 / arrival_rate) * log(1 - u))
+	def generate_service_time():
+		u = random.random()
+		return ((-1 / service_rate) * log(1 - u))
+	def generate_packet():
+		return Packet(generate_service_time())
+
 	for i in range(N):
 		event_list.schedule("arrival", generate_arrival_time(), generate_packet())
-	# print (event_list.head.time)
+		#print(event_list.head)
+	 	#print(event_list.head.time)
 
 	for i in range(N-1):
 	    event = event_list.pop()
+	    # print(event)
+	    #print(event_list)
 	    current_time = event.time
 	    # print(event.time)
 	    if event.type == "arrival":
@@ -140,12 +156,34 @@ if __name__ == '__main__':
 	print("--------------------------------------")
 	print("Server utilization:", end=' ')
 	print(total_server_busy_time / current_time)
+	utilization.append(total_server_busy_time / current_time)
 	print("Average queue length:", end=' ')
 	print(total_packet_queue_length / total_packets)
+	queueLength.append(total_packet_queue_length / total_packets)
 	print("Packet drop rate:", end=' ')
 	print(total_dropped_packets / total_packets)
+	dropRate.append(total_dropped_packets / total_packets)
 	print("--------------------------------------")
 	print("The total number of dropped packets", end=' ')
 	print(total_dropped_packets)
 
+if __name__ == '__main__':
+	MAX_BUFFER = 100000
+	expr1_arrival_rate = [0.1, 0.25, 0.4, 0.55, 0.65, 0.80, 0.90]
+	expr1_serviceRate = 1
+	utilization = []
+	queueLength = []
+	dropRate = []
+	totalDropped = []
+	for rate in expr1_arrival_rate:
+		simulate(MAX_BUFFER, expr1_serviceRate, rate, utilization, queueLength, dropRate, totalDropped)
+	
+	print("utilization")
+	print(str(utilization))
+	print("queueLength")
+	print(str(queueLength))
+	print("dropRate")
+	print(str(dropRate))
+	print("totalDropped")
+	print(str(totalDropped))
 
